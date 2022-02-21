@@ -232,13 +232,16 @@ I would love to know how much money I saved (hopefully?) by having a garden. Cou
 We will look at a subset of the `garden_harvest` data: the tomatoes.
 
 ```{r}
-
+  garden_harvest %>% 
+    filter(vegetable == "tomatoes")
 ```
 
 Let's look at the default order of variety. We will do this by counting how many harvests of each variety. The order they are printed is the default ordering.
 
 ```{r}
-
+garden_harvest %>% 
+    filter(vegetable == "tomatoes") %>% 
+      count(variety)
 ```
 
 We can see the default is alphabetical.
@@ -250,19 +253,24 @@ We can manually change the order using `fct_relevel()`. I will put "Black Krim" 
 I can either do this by creating a new variable:
 
 ```{r}
-
+  garden_harvest %>% 
+    filter(vegetable == "tomatoes") %>% 
+      mutate(variety2 = fct_relevel(variety, "Black Krim", "Cherokee Purple")) %>% 
+        count(variety2)
 ```
 
 or by putting it inside the `count()`:
 
 ```{r}
-
+  garden_harvest %>% 
+    filter(vegetable == "tomatoes") %>%
+        count(fct_relevel(variety, "Black Krim", "Cherokee Purple"))
 ```
 
 or, if I'm graphing it, putting it inside an x or y aesthetic:
 
 ```{r}
-
+  
 ```
 
 ### `fct_infreq()`
@@ -270,7 +278,10 @@ or, if I'm graphing it, putting it inside an x or y aesthetic:
 The `fct_infreq()` function puts the levels in order by frequency (how often they occur), from most to least. Let's try this with the tomatoes.
 
 ```{r}
-
+  garden_harvest %>% 
+    filter(vegetable == "tomatoes") %>% 
+      mutate(variety2 = fct_infreq(variety)) %>% 
+        count(variety2)
 ```
 
 Like with `fct_relevel()` we can also use `fct_infreq()` directly in a plotting aesthetic:
@@ -288,7 +299,11 @@ This function has three arguments: factor you want reordered, the variable you w
 In the summary below, I include both the count and the summed weight so you can clearly see that the ordering is correct.
 
 ```{r}
-
+  garden_harvest %>% 
+    filter(vegetable == "tomatoes") %>% 
+      mutate(variety2 = fct_reorder(variety, weight, sum, .desc = TRUE)) %>% 
+        group_by(variety2) %>% 
+          summarize( count = n(), gross = sum(weight))
 ```
 
 ### `fct_rev()`
@@ -304,11 +319,14 @@ The `fct_rev()` function reverses the current order. I often use this in combina
 This is a way to manually create new levels. A simple example would be if I wanted to capitalize the "grape" and "volunteers" levels to match everything else. The format of this function is:
 
 ```{r, eval=FALSE}
-
+  
 ```
 
 ```{r}
-
+  garden_harvest %>% 
+    filter(vegetable == "tomatoes") %>% 
+      mutate(variety2 = fct_recode(variety, Grape = "grape", Volunteers = "volunteers")) %>% 
+        count(variety2)
 ```
 
 ### `fct_lump()`
@@ -316,7 +334,8 @@ This is a way to manually create new levels. A simple example would be if I want
 This is an easy way to group together less common levels. Let's go back to the full `garden_harvest` data. First, let's count the number of harvests of each vegetable and arrange by descending n.
 
 ```{r}
-
+  garden_harvest %>% 
+     mutate(vegetable_grp = fct_lump(vegetable, n=9, other_level = "Under 10th"))
 ```
 
 You can tell `fct_lump()` either how many levels you want to preserve by providing `n=` argument or you can tell it to preserve levels that appear at least a certain proportion of time by providing `prop=` argument. Below, we preserve the top 9 vegetables and lump all others together. 
